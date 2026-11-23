@@ -1,0 +1,14 @@
+{
+  "appKey": "ipedir.parceiros",
+  "name": "iPedir Parceiros",
+  "appId": "br.com.ipedir.parceiros",
+  "iosBundleId": "br.com.ipedir.parceiros",
+  "url": "https://ipedir.lhmidia.com/login",
+  "hosts": ["ipedir.lhmidia.com"],
+  "color": "#242525",
+  "background": "#ffffff",
+  "icon": "apps/icons/ipedir-parceiros.png",
+  "platforms": "both",
+  "driverGps": false,
+  "version": "1.0.0"
+}

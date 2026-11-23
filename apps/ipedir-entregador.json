@@ -1,0 +1,14 @@
+{
+  "appKey": "ipedir.entregador",
+  "name": "iPedir Entregador",
+  "appId": "br.com.ipedir.entregador",
+  "iosBundleId": "br.com.ipedir.entregador",
+  "url": "https://ipedir.lhmidia.com/login",
+  "hosts": ["ipedir.lhmidia.com"],
+  "color": "#399742",
+  "background": "#ffffff",
+  "icon": "apps/icons/ipedir-entregador.png",
+  "platforms": "both",
+  "driverGps": true,
+  "version": "1.0.0"
+}

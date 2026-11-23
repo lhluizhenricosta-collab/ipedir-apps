@@ -1,0 +1,211 @@
+# =====================================================================
+# CODEMAGIC — apps do iPedir e apps próprios (lojas e agências)
+#
+# Cada app tem 2 workflows: Android (.aab) e iPhone (.ipa). Os dois rodam no Mac M2,
+# que é a máquina com os 500 minutos grátis por mês da conta pessoal.
+#
+# Grupos de variáveis (Codemagic › Team/App settings › Environment variables):
+#   firebase_<app>   GOOGLE_SERVICES_JSON e GOOGLE_SERVICE_INFO_PLIST (os arquivos do Firebase em base64)
+#   google_play      GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (conta de serviço do Play Console, JSON)
+#   app_store        APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_IDENTIFIER,
+#                    APP_STORE_CONNECT_PRIVATE_KEY, CERTIFICATE_PRIVATE_KEY
+# Keystore do Android: Codemagic › Code signing identities › Android keystores (nome: ipedir_keystore)
+# Passo a passo completo no README.md
+# =====================================================================
+
+definitions:
+  instance: &mac
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+  node: &node
+    node: 20
+
+  scripts:
+    - &install
+      name: Instalar dependências
+      script: npm install --no-audit --no-fund
+
+    - &prepare_android
+      name: Preparar o app (Android)
+      script: node scripts/prepare.mjs --app "$APP" --platform android
+
+    - &prepare_ios
+      name: Preparar o app (iPhone)
+      script: node scripts/prepare.mjs --app "$APP" --platform ios
+
+    - &android_project
+      name: Montar o projeto Android
+      script: |
+        set -e
+        npx cap add android
+        npx capacitor-assets generate --android \
+          --iconBackgroundColor "$APP_BG" --iconBackgroundColorDark "$APP_BG" \
+          --splashBackgroundColor "$APP_BG" --splashBackgroundColorDark "$APP_BG"
+        echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+        node scripts/patch-android.mjs
+        npx cap sync android
+
+    - &android_build
+      name: Gerar o .aab
+      script: |
+        set -e
+        cd android
+        ./gradlew bundleRelease
+
+    - &ios_signing
+      name: Certificado e perfil da App Store
+      script: |
+        set -e
+        keychain initialize
+        app-store-connect fetch-signing-files "$APP_ID" --type IOS_APP_STORE --create
+        keychain add-certificates
+        xcode-project use-profiles
+
+    - &ios_project
+      name: Montar o projeto iPhone
+      script: |
+        set -e
+        npx cap add ios --packagemanager CocoaPods
+        npx capacitor-assets generate --ios \
+          --iconBackgroundColor "$APP_BG" --splashBackgroundColor "$APP_BG" --splashBackgroundColorDark "$APP_BG"
+        echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/App/App/GoogleService-Info.plist
+        node scripts/patch-ios.mjs
+        ruby scripts/ios-add-files.rb
+        npx cap sync ios
+        cd ios/App && pod install
+
+    - &ios_build
+      name: Gerar o .ipa
+      script: |
+        set -e
+        cd ios/App
+        agvtool new-version -all "$BUILD_NUMBER"
+        agvtool new-marketing-version "$APP_VERSION"
+        xcode-project build-ipa --workspace App.xcworkspace --scheme App
+
+  android_artifacts: &android_artifacts
+    - android/app/build/outputs/bundle/release/*.aab
+
+  ios_artifacts: &ios_artifacts
+    - build/ios/ipa/*.ipa
+
+  publish_play: &publish_play
+    google_play:
+      credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      track: internal          # teste interno; promova para produção no Play Console
+      submit_as_draft: true    # enquanto o app não tiver a primeira versão aprovada
+
+  publish_apple: &publish_apple
+    app_store_connect:
+      api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+      issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      submit_to_testflight: true
+
+workflows:
+  # =================== iPedir Delivery ===================
+  android-delivery:
+    name: Android · iPedir Delivery
+    <<: *mac
+    environment:
+      <<: *node
+      groups: [firebase_delivery, google_play]
+      vars: { APP: ipedir-delivery }
+      android_signing: [ipedir_keystore]
+    scripts: [*install, *prepare_android, *android_project, *android_build]
+    artifacts: *android_artifacts
+    publishing: *publish_play
+
+  ios-delivery:
+    name: iPhone · iPedir Delivery
+    <<: *mac
+    environment:
+      <<: *node
+      xcode: latest
+      cocoapods: default
+      groups: [firebase_delivery, app_store]
+      vars: { APP: ipedir-delivery }
+    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    artifacts: *ios_artifacts
+    publishing: *publish_apple
+
+  # =================== iPedir Entregador ===================
+  android-entregador:
+    name: Android · iPedir Entregador
+    <<: *mac
+    environment:
+      <<: *node
+      groups: [firebase_entregador, google_play]
+      vars: { APP: ipedir-entregador }
+      android_signing: [ipedir_keystore]
+    scripts: [*install, *prepare_android, *android_project, *android_build]
+    artifacts: *android_artifacts
+    publishing: *publish_play
+
+  ios-entregador:
+    name: iPhone · iPedir Entregador
+    <<: *mac
+    environment:
+      <<: *node
+      xcode: latest
+      cocoapods: default
+      groups: [firebase_entregador, app_store]
+      vars: { APP: ipedir-entregador }
+    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    artifacts: *ios_artifacts
+    publishing: *publish_apple
+
+  # =================== iPedir Parceiros ===================
+  android-parceiros:
+    name: Android · iPedir Parceiros
+    <<: *mac
+    environment:
+      <<: *node
+      groups: [firebase_parceiros, google_play]
+      vars: { APP: ipedir-parceiros }
+      android_signing: [ipedir_keystore]
+    scripts: [*install, *prepare_android, *android_project, *android_build]
+    artifacts: *android_artifacts
+    publishing: *publish_play
+
+  ios-parceiros:
+    name: iPhone · iPedir Parceiros
+    <<: *mac
+    environment:
+      <<: *node
+      xcode: latest
+      cocoapods: default
+      groups: [firebase_parceiros, app_store]
+      vars: { APP: ipedir-parceiros }
+    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    artifacts: *ios_artifacts
+    publishing: *publish_apple
+
+  # =================== App próprio (loja ou agência) ===================
+  # Ao iniciar o build, preencha APP (nome do arquivo em apps/, sem .json) e escolha os grupos
+  # do cliente: cliente_<nome>_firebase, cliente_<nome>_play e cliente_<nome>_apple.
+  android-white-label:
+    name: Android · App próprio (loja/agência)
+    <<: *mac
+    environment:
+      <<: *node
+      groups: [cliente_firebase, cliente_play]
+      vars: { APP: troque-pelo-arquivo }
+      android_signing: [cliente_keystore]
+    scripts: [*install, *prepare_android, *android_project, *android_build]
+    artifacts: *android_artifacts
+    publishing: *publish_play
+
+  ios-white-label:
+    name: iPhone · App próprio (loja/agência)
+    <<: *mac
+    environment:
+      <<: *node
+      xcode: latest
+      cocoapods: default
+      groups: [cliente_firebase, cliente_apple]
+      vars: { APP: troque-pelo-arquivo }
+    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    artifacts: *ios_artifacts
+    publishing: *publish_apple

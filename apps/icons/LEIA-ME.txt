@@ -1,0 +1,11 @@
+Coloque aqui o ícone de cada app do iPedir, com estes nomes:
+
+  ipedir-delivery.png
+  ipedir-entregador.png
+  ipedir-parceiros.png
+
+PNG quadrado, 1024 x 1024, sem cantos arredondados (a Apple e o Android arredondam sozinhos)
+e sem transparência no fundo (a Apple recusa ícone transparente).
+
+Os apps de loja e de agência não precisam de arquivo aqui: o JSON baixado no painel
+já traz o "iconUrl" (o ícone enviado no pedido, o favicon da agência ou a logo da loja).

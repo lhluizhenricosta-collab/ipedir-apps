@@ -1,0 +1,14 @@
+{
+  "appKey": "ipedir.delivery",
+  "name": "iPedir Delivery",
+  "appId": "br.com.ipedir.delivery",
+  "iosBundleId": "br.com.ipedir.delivery",
+  "url": "https://ipedir.lhmidia.com",
+  "hosts": ["ipedir.lhmidia.com"],
+  "color": "#399742",
+  "background": "#ffffff",
+  "icon": "apps/icons/ipedir-delivery.png",
+  "platforms": "both",
+  "driverGps": false,
+  "version": "1.0.0"
+}
