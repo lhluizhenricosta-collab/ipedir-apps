@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
  *   node scripts/prepare.mjs --app ipedir-delivery --platform android
  * (o Codemagic roda isso sozinho; o arquivo de cada app fica em apps/<nome>.json)
  */
-const app = JSON.parse(readFileSync(new URL('./app.config.json', import.meta.url), 'utf8'));
+const app = JSON.parse(readFileSync('./app.config.json', 'utf8'));
 
 const config: CapacitorConfig = {
   appId: app.appId,
