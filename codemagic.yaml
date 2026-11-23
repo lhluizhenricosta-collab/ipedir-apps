@@ -40,6 +40,7 @@ definitions:
       script: |
         set -e
         npx cap add android
+        sed -i '' 's/minSdkVersion = 23/minSdkVersion = 24/' android/variables.gradle
         npx capacitor-assets generate --android \
           --iconBackgroundColor "$APP_BG" --iconBackgroundColorDark "$APP_BG" \
           --splashBackgroundColor "$APP_BG" --splashBackgroundColorDark "$APP_BG"
