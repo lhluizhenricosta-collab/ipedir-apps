@@ -53,8 +53,8 @@ definitions:
         echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
         node scripts/patch-android.mjs
         npx cap sync android
-        # 23/11: Android 15+ desenha o site embaixo das barras do sistema; isto deixa o site entre elas
-        node -e "const fs=require('fs');const f='android/app/src/main/assets/capacitor.config.json';const c=JSON.parse(fs.readFileSync(f,'utf8'));c.android=Object.assign({},c.android,{adjustMarginsForEdgeToEdge:'force'});fs.writeFileSync(f,JSON.stringify(c,null,2));console.log('Margens das barras: force')"
+        # 23/11: site entre as barras, barras na cor da página (plugin SystemBars) e abertura na cor do app
+        node scripts/android-visual.mjs
 
     - &android_build
       name: Gerar o .aab
