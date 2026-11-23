@@ -19,7 +19,10 @@ definitions:
     max_build_duration: 60
 
   node: &node
+    # 23/11: versão fixa. Do Node 20.19 em diante o capacitor.config.ts quebra
+    # ("exports is not defined in ES module scope").
     node: 20.18.0
+    # 23/11: o Capacitor 7 exige Java 21 ("invalid source release: 21")
     java: 21
 
   scripts:
@@ -40,6 +43,7 @@ definitions:
       script: |
         set -e
         npx cap add android
+        # 23/11: Proteção Automática do Play exige mínimo SDK 24; a Play exige alvo SDK 36
         sed -i '' -e 's/minSdkVersion = 23/minSdkVersion = 24/' -e 's/compileSdkVersion = 35/compileSdkVersion = 36/' -e 's/targetSdkVersion = 35/targetSdkVersion = 36/' android/variables.gradle
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         grep -E 'SdkVersion' android/variables.gradle
@@ -49,6 +53,8 @@ definitions:
         echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
         node scripts/patch-android.mjs
         npx cap sync android
+        # 23/11: Android 15+ desenha o site embaixo das barras do sistema; isto deixa o site entre elas
+        node -e "const fs=require('fs');const f='android/app/src/main/assets/capacitor.config.json';const c=JSON.parse(fs.readFileSync(f,'utf8'));c.android=Object.assign({},c.android,{adjustMarginsForEdgeToEdge:'force'});fs.writeFileSync(f,JSON.stringify(c,null,2));console.log('Margens das barras: force')"
 
     - &android_build
       name: Gerar o .aab
