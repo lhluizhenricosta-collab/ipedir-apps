@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "Apps do iPedir (Delivery, Entregador, Parceiros) e apps próprios de lojas e agências, montados com Capacitor",
-  "type": "module",
   "scripts": {
     "prepare:app": "node scripts/prepare.mjs",
     "patch:android": "node scripts/patch-android.mjs",
