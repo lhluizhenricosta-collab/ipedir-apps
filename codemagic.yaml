@@ -97,6 +97,9 @@ definitions:
         /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysAndWhenInUseUsageDescription" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string $LOC_ALWAYS" "$PLIST"
         /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysUsageDescription" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysUsageDescription string $LOC_ALWAYS" "$PLIST"
         /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysAndWhenInUseUsageDescription" "$PLIST"
+        # 24/11: o app só usa criptografia padrão (HTTPS). Assim a Apple não pergunta a
+        # "conformidade de exportação" a cada build (e o pós-processamento do Codemagic não fica vermelho)
+        /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
         sed -i '' -E "s/platform :ios, '1[0-4](\.0)?'/platform :ios, '15.0'/" ios/App/Podfile
         sed -i '' -E 's/IPHONEOS_DEPLOYMENT_TARGET = 1[0-4]\.0;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/App/App.xcodeproj/project.pbxproj
         grep -E "platform :ios" ios/App/Podfile || true
