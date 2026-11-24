@@ -99,7 +99,9 @@ definitions:
   android_artifacts: &android_artifacts
     - android/app/build/outputs/bundle/release/*.aab
 
+  # 24/11: o .ipa é gerado dentro de ios/App (o "Gerar o .ipa" roda lá)
   ios_artifacts: &ios_artifacts
+    - ios/App/build/ios/ipa/*.ipa
     - build/ios/ipa/*.ipa
 
   publish_play: &publish_play
