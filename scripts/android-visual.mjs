@@ -6,7 +6,7 @@
 //    cima (relógio) e a de baixo (botões), com ícones claros ou escuros conforme a cor.
 //    Plugin nativo SystemBars, usado por resources/js/app-system-bars.js no Laravel.
 // 3. Abertura mais profissional: fundo na cor do app (sem tela branca antes do site),
-//    ícone no centro no Android 12+ e saída suave.
+//    ícone do app no centro (Android 12+) e saída suave.
 //
 // Uso: node scripts/android-visual.mjs     (a cor vem de APP_BG, a mesma dos ícones)
 // =====================================================================
@@ -139,12 +139,10 @@ if (fs.existsSync(stylesFile)) {
     let styles = fs.readFileSync(stylesFile, 'utf8');
     const launch = /(<style\s+name="AppTheme\.NoActionBarLaunch"[^>]*>)([\s\S]*?)(<\/style>)/;
     if (launch.test(styles) && !styles.includes('windowSplashScreenBackground')) {
-        const res = 'android/app/src/main/res';
-        const hasForeground = fs.readdirSync(res).some((d) => d.startsWith('mipmap')
-            && fs.existsSync(path.join(res, d, 'ic_launcher_foreground.png')));
+        // 23/11 (noite): sem windowSplashScreenAnimatedIcon. O Android usa o ícone do app inteiro,
+        // como na 1ª versão (o foreground sozinho ficava com zoom e cortado no círculo).
         const items = [
             `        <item name="windowSplashScreenBackground">${BG}</item>`,
-            hasForeground ? '        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>' : '',
             styles.includes('postSplashScreenTheme') ? '' : '        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>',
         ].filter(Boolean).join('\n');
         styles = styles.replace(launch, (all, open, body, close) => `${open}${body}${items}\n    ${close}`);
