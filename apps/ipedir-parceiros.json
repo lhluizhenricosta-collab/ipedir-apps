@@ -6,7 +6,7 @@
   "url": "https://ipedir.ipedir.com/login",
   "hosts": ["ipedir.ipedir.com"],
   "color": "#242525",
-  "background": "#ffffff",
+  "background": "#009838",
   "icon": "apps/icons/ipedir-parceiros.png",
   "platforms": "both",
   "driverGps": false,
