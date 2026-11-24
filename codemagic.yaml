@@ -63,6 +63,8 @@ definitions:
         cd android
         ./gradlew bundleRelease
 
+    # 24/11: roda DEPOIS de montar o projeto iPhone. Antes rodava antes, e o "use-profiles"
+    # não achava o projeto para aplicar o perfil (erro "requires a provisioning profile with the Push Notifications feature")
     - &ios_signing
       name: Certificado e perfil da App Store
       script: |
@@ -136,7 +138,7 @@ workflows:
       cocoapods: default
       groups: [firebase_delivery, app_store]
       vars: { APP: ipedir-delivery }
-    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    scripts: [*install, *prepare_ios, *ios_project, *ios_signing, *ios_build]
     artifacts: *ios_artifacts
     publishing: *publish_apple
 
@@ -162,7 +164,7 @@ workflows:
       cocoapods: default
       groups: [firebase_entregador, app_store]
       vars: { APP: ipedir-entregador }
-    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    scripts: [*install, *prepare_ios, *ios_project, *ios_signing, *ios_build]
     artifacts: *ios_artifacts
     publishing: *publish_apple
 
@@ -188,7 +190,7 @@ workflows:
       cocoapods: default
       groups: [firebase_parceiros, app_store]
       vars: { APP: ipedir-parceiros }
-    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    scripts: [*install, *prepare_ios, *ios_project, *ios_signing, *ios_build]
     artifacts: *ios_artifacts
     publishing: *publish_apple
 
@@ -216,6 +218,6 @@ workflows:
       cocoapods: default
       groups: [cliente_firebase, cliente_apple]
       vars: { APP: troque-pelo-arquivo }
-    scripts: [*install, *prepare_ios, *ios_signing, *ios_project, *ios_build]
+    scripts: [*install, *prepare_ios, *ios_project, *ios_signing, *ios_build]
     artifacts: *ios_artifacts
     publishing: *publish_apple
