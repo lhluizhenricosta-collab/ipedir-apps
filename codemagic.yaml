@@ -83,6 +83,23 @@ definitions:
           --iconBackgroundColor "$APP_BG" --splashBackgroundColor "$APP_BG" --splashBackgroundColorDark "$APP_BG"
         echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/App/App/GoogleService-Info.plist
         node scripts/patch-ios.mjs
+        # 24/11: textos de localização (aviso 90683 da Apple: o plugin de GPS vai em todos os apps)
+        # e iOS mínimo 15 (aviso 90068). Só acrescenta o texto que ainda não existir.
+        PLIST=ios/App/App/Info.plist
+        if [ "$APP" = "ipedir-entregador" ]; then
+          LOC_USE="Usamos a sua localização para mostrar as corridas perto de você e o caminho até a entrega."
+          LOC_ALWAYS="Com você online, a sua localização é enviada mesmo com a tela apagada, para o cliente e a loja acompanharem a entrega. Ao ficar offline, o envio para."
+        else
+          LOC_USE="Usamos a sua localização para mostrar as lojas que entregam no seu endereço e calcular a taxa de entrega."
+          LOC_ALWAYS="Usamos a sua localização só enquanto você usa o app, para mostrar as lojas que entregam no seu endereço."
+        fi
+        /usr/libexec/PlistBuddy -c "Print :NSLocationWhenInUseUsageDescription" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string $LOC_USE" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysAndWhenInUseUsageDescription" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string $LOC_ALWAYS" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysUsageDescription" "$PLIST" >/dev/null 2>&1 || /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysUsageDescription string $LOC_ALWAYS" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysAndWhenInUseUsageDescription" "$PLIST"
+        sed -i '' -E "s/platform :ios, '1[0-4](\.0)?'/platform :ios, '15.0'/" ios/App/Podfile
+        sed -i '' -E 's/IPHONEOS_DEPLOYMENT_TARGET = 1[0-4]\.0;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/App/App.xcodeproj/project.pbxproj
+        grep -E "platform :ios" ios/App/Podfile || true
         ruby scripts/ios-add-files.rb
         npx cap sync ios
         cd ios/App && pod install
