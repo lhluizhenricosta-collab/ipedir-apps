@@ -11,6 +11,7 @@
 #                    APP_STORE_CONNECT_PRIVATE_KEY, CERTIFICATE_PRIVATE_KEY
 # Keystore do Android: Codemagic › Code signing identities › Android keystores (nome: ipedir_keystore)
 # Passo a passo completo no README.md
+# Apps de clientes: Master › Guia: publicar app (gera o bloco de workflows de cada cliente)
 # =====================================================================
 
 definitions:
@@ -216,30 +217,8 @@ workflows:
     artifacts: *ios_artifacts
     publishing: *publish_apple
 
-  # =================== App próprio (loja ou agência) ===================
-  # Ao iniciar o build, preencha APP (nome do arquivo em apps/, sem .json) e escolha os grupos
-  # do cliente: cliente_<nome>_firebase, cliente_<nome>_play e cliente_<nome>_apple.
-  android-white-label:
-    name: Android · App próprio (loja/agência)
-    <<: *mac
-    environment:
-      <<: *node
-      groups: [cliente_firebase, cliente_play]
-      vars: { APP: troque-pelo-arquivo }
-      android_signing: [cliente_keystore]
-    scripts: [*install, *prepare_android, *android_project, *android_build]
-    artifacts: *android_artifacts
-    publishing: *publish_play
-
-  ios-white-label:
-    name: iPhone · App próprio (loja/agência)
-    <<: *mac
-    environment:
-      <<: *node
-      xcode: latest
-      cocoapods: default
-      groups: [cliente_firebase, cliente_apple]
-      vars: { APP: troque-pelo-arquivo }
-    scripts: [*install, *prepare_ios, *ios_project, *ios_signing, *ios_build]
-    artifacts: *ios_artifacts
-    publishing: *publish_apple
+  # =================== Apps próprios (lojas e agências) ===================
+  # Cada cliente tem os 2 workflows dele, com os grupos e a keystore SÓ dele
+  # (assim um cliente nunca usa as chaves de outro).
+  # Para criar: Master › Guia: publicar app › escolha o pedido › Etapa 4.3 › "Copiar bloco"
+  # e cole o bloco AQUI EMBAIXO, no fim do arquivo (sem mudar os espaços do começo das linhas).
