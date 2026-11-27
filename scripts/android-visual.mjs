@@ -7,6 +7,7 @@
 //    Plugin nativo SystemBars, usado por resources/js/app-system-bars.js no Laravel.
 // 3. Abertura mais profissional: fundo na cor do app (sem tela branca antes do site),
 //    ícone do app no centro (Android 12+) e saída suave.
+// 4. Teclado (26/11): a janela encolhe quando o teclado abre (adjustResize).
 //
 // Uso: node scripts/android-visual.mjs     (a cor vem de APP_BG, a mesma dos ícones)
 // =====================================================================
@@ -149,6 +150,17 @@ if (fs.existsSync(stylesFile)) {
         fs.writeFileSync(stylesFile, styles);
         log('abertura do Android 12+ na cor ' + BG);
     }
+}
+
+// ---------- 4: teclado (26/11): a tela encolhe quando o teclado abre ----------
+const manifestFile = 'android/app/src/main/AndroidManifest.xml';
+if (fs.existsSync(manifestFile)) {
+    let manifest = fs.readFileSync(manifestFile, 'utf8');
+    if (!manifest.includes('windowSoftInputMode')) {
+        manifest = manifest.replace(/<activity\b/, '<activity android:windowSoftInputMode="adjustResize"');
+        fs.writeFileSync(manifestFile, manifest);
+    }
+    log('teclado: adjustResize');
 }
 
 log('pronto');
