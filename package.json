@@ -1,6 +1,6 @@
 {
   "name": "ipedir-apps",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Apps do iPedir (Delivery, Entregador, Parceiros) e apps próprios de lojas e agências, montados com Capacitor",
   "scripts": {
@@ -15,6 +15,7 @@
     "@capacitor/app": "^7.0.0",
     "@capacitor/core": "^7.4.0",
     "@capacitor/ios": "^7.4.0",
+    "@capacitor/keyboard": "^7.0.0",
     "@capacitor/splash-screen": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
     "firebase": "^11.0.0"

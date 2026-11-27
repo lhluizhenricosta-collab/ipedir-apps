@@ -1,4 +1,5 @@
 /// <reference types="@capacitor-firebase/messaging" />
+/// <reference types="@capacitor/keyboard" />
 import type { CapacitorConfig } from '@capacitor/cli';
 import { readFileSync } from 'node:fs';
 
@@ -33,7 +34,10 @@ const config: CapacitorConfig = {
 
   ios: {
     backgroundColor: app.background,
-    contentInset: 'automatic',
+    // 26/11: o site ocupa a tela toda e cuida das áreas do relógio e da barra de baixo
+    // (resources/js/app-native.js no Laravel coloca a faixa jateada). Antes, com "automatic",
+    // o conteúdo passava por baixo do relógio sem fundo ao rolar.
+    contentInset: 'never',
   },
 
   plugins: {
@@ -44,6 +48,12 @@ const config: CapacitorConfig = {
       launchShowDuration: 900,
       backgroundColor: app.background,
       showSpinner: false,
+    },
+    // 26/11: teclado. A tela encolhe quando o teclado abre (o campo não fica escondido),
+    // inclusive no Android 15+ (tela inteira). O site leva o campo para o meio da tela.
+    Keyboard: {
+      resize: 'native',
+      resizeOnFullScreen: true,
     },
     CapacitorHttp: {
       enabled: false, // não troca o fetch do site; o GPS usa o HTTP nativo direto
